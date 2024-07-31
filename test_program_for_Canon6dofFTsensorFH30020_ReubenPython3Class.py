@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision A, 06/17/2024
+Software Revision B, 07/31/2024
 
 Verified working on: Python 3.11 for Windows 11 64-bit and Raspberry Pi Buster (may work on Mac in non-GUI mode, but haven't tested yet).
 '''
@@ -387,7 +387,7 @@ def GUI_Thread():
     #################################################
     global ResetTare_Button
     ResetTare_Button = Button(ButtonsFrame, text="Reset Tare", state="normal", width=20, command=lambda: ResetTare_Button_Response())
-    ResetTare_Button.grid(row=0, column=0, padx=10, pady=10, columnspan=1, rowspan=1)
+    #ResetTare_Button.grid(row=0, column=0, padx=10, pady=10, columnspan=1, rowspan=1)
     #################################################
     #################################################
 
@@ -542,13 +542,13 @@ if __name__ == '__main__':
     global root
 
     global root_Xpos
-    root_Xpos = 900
+    root_Xpos = 870
 
     global root_Ypos
-    root_Ypos = 0
+    root_Ypos = 20
 
     global root_width
-    root_width = 1920 - root_Xpos
+    root_width = 1020
 
     global root_height
     root_height = 1020 - root_Ypos
@@ -671,6 +671,7 @@ if __name__ == '__main__':
                                                                                 ("DedicatedRxThread_TimeToSleepEachLoop", 0.001),
                                                                                 ("DedicatedTxThread_TimeToSleepEachLoop", 0.010),
                                                                                 ("DedicatedTxThread_TxMessageToSend_Queue_MaxSize", 1),
+                                                                                ("ResetTareAtStartOfProgramFlag", 1),
                                                                                 ("StreamingModeString", "Binary_Standard_Continuous")]) #Binary_Simple_Continuous, #Binary_Standard_Continuous
     #################################################
 

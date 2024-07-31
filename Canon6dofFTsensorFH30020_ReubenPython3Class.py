@@ -5,7 +5,7 @@ Reuben Brewer, Ph.D.
 reuben.brewer@gmail.com
 www.reubotics.com
 
-Software Revision A, 06/17/2024
+Software Revision B, 07/31/2024
 
 Verified working on: Python 3.11 for Windows 11 64-bit and Raspberry Pi Buster (may work on Mac in non-GUI mode, but haven't tested yet).
 '''
@@ -28,7 +28,7 @@ from copy import * #for deepcopy
 import inspect #To enable 'TellWhichFileWereIn'
 import threading
 import traceback
-import binascii
+#import binascii
 ##########################################
 
 ##########################################
@@ -158,6 +158,8 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         self.ResetTare_EventNeedsToBeFiredFlag = 0
         self.ResetTare_EventHasHappenedFlag = 0
+
+        self.FlushSerial_EventNeedsToBeFiredFlag = 0
         
         self.MostRecentDataDict = dict()
 
@@ -383,6 +385,17 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
             self.DedicatedTxThread_TimeToSleepEachLoop = 0.005
 
         print("Canon6dofFTsensorFH30020_ReubenPython3Class __init__: DedicatedTxThread_TimeToSleepEachLoop: " + str(self.DedicatedTxThread_TimeToSleepEachLoop))
+        #########################################################
+        #########################################################
+
+        #########################################################
+        #########################################################
+        if "ResetTareAtStartOfProgramFlag" in setup_dict:
+            self.ResetTareAtStartOfProgramFlag = self.PassThrough0and1values_ExitProgramOtherwise("ResetTareAtStartOfProgramFlag", setup_dict["ResetTareAtStartOfProgramFlag"])
+        else:
+            self.ResetTareAtStartOfProgramFlag = 1
+
+        print("Canon6dofFTsensorFH30020_ReubenPython3Class __init__: ResetTareAtStartOfProgramFlag: " + str(self.ResetTareAtStartOfProgramFlag))
         #########################################################
         #########################################################
 
@@ -1027,9 +1040,15 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         #########################################################
         #########################################################
-        self.StopVariableStreaming()
-        time.sleep(0.002)
+        for Counter in range(0,5):
+            self.StopVariableStreaming()
+            time.sleep(0.002)
+
         self.StartVariableStreaming(self.StreamingModeString)
+
+        if self.ResetTareAtStartOfProgramFlag == 1:
+            time.sleep(0.25)
+            self.ResetTare_EventNeedsToBeFiredFlag = 1
         #########################################################
         #########################################################
 
@@ -1041,7 +1060,13 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
             ########################################################################################################## These should be outside of the queue and heartbeat
             ##########################################################################################################
-            
+
+            ##########################################################################################################
+            if self.FlushSerial_EventNeedsToBeFiredFlag == 1:
+                self.SerialObject.reset_input_buffer()
+                self.FlushSerial_EventNeedsToBeFiredFlag = 0
+            ##########################################################################################################
+
             ##########################################################################################################
             if self.ResetTare_EventNeedsToBeFiredFlag == 1:
                 self.ResetTare()
@@ -1398,8 +1423,15 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         #################################################
         #################################################
-        self.ResetTare_Button = Button(self.ButtonsFrame, text="Reset Tare", state="normal", width=20, command=lambda: self.ResetTare_Button_Response())
-        self.ResetTare_Button.grid(row=0, column=1, padx=10, pady=10, columnspan=1, rowspan=1)
+        self.ResetTare_Button = Button(self.ButtonsFrame, text="Reset Tare", state="normal", width=20, bg=self.TKinter_LightYellowColor, command=lambda: self.ResetTare_Button_Response())
+        self.ResetTare_Button.grid(row=0, column=0, padx=10, pady=10, columnspan=1, rowspan=1)
+        #################################################
+        #################################################
+        
+        #################################################
+        #################################################
+        self.FlushSerial_Button = Button(self.ButtonsFrame, text="Flush Serial", state="normal", width=20, command=lambda: self.FlushSerial_Button_Response())
+        self.FlushSerial_Button.grid(row=0, column=1, padx=10, pady=10, columnspan=1, rowspan=1)
         #################################################
         #################################################
 
@@ -1445,6 +1477,17 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
         self.ResetTare_EventNeedsToBeFiredFlag = 1
 
         #self.MyPrint_WithoutLogFile("ResetTare_Button_Response: Event fired!")
+
+    ##########################################################################################################
+    ##########################################################################################################
+
+    ##########################################################################################################
+    ##########################################################################################################
+    def FlushSerial_Button_Response(self):
+
+        self.FlushSerial_EventNeedsToBeFiredFlag = 1
+
+        #self.MyPrint_WithoutLogFile("FlushSerial_Button_Response: Event fired!")
 
     ##########################################################################################################
     ##########################################################################################################
