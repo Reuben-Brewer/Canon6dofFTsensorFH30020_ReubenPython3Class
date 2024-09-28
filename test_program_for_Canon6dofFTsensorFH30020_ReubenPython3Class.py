@@ -6,7 +6,7 @@ reuben.brewer@gmail.com
 www.reubotics.com
 
 Apache 2 License
-Software Revision B, 07/31/2024
+Software Revision C, 09/27/2024
 
 Verified working on: Python 3.11 for Windows 11 64-bit and Raspberry Pi Buster (may work on Mac in non-GUI mode, but haven't tested yet).
 '''
@@ -16,6 +16,8 @@ __author__ = 'reuben.brewer'
 ##########################################
 from Canon6dofFTsensorFH30020_ReubenPython3Class import *
 from CSVdataLogger_ReubenPython3Class import *
+from EntryListWithBlinking_ReubenPython2and3Class import *
+from LowPassFilterForDictsOfLists_ReubenPython2and3Class import *
 from MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3Class import *
 from MyPrint_ReubenPython2and3Class import *
 ##########################################
@@ -28,6 +30,7 @@ import time
 import datetime
 import threading
 import collections
+import keyboard
 ##########################################
 
 ##########################################
@@ -259,13 +262,16 @@ def GUI_update_clock():
     global Canon6dofFTsensorFH30020_MostRecentDict
     global Canon6dofFTsensorFH30020_MostRecentDict_Label
 
-    global MyPrint_ReubenPython2and3ClassObject
-    global MyPrint_OPEN_FLAG
-    global SHOW_IN_GUI_MyPrint_FLAG
+    global EntryListWithBlinking_ReubenPython2and3ClassObject
+    global EntryListWithBlinking_OPEN_FLAG
 
     global CSVdataLogger_ReubenPython3ClassObject
     global CSVdataLogger_OPEN_FLAG
     global SHOW_IN_GUI_CSVdataLogger_FLAG
+
+    global MyPrint_ReubenPython2and3ClassObject
+    global MyPrint_OPEN_FLAG
+    global SHOW_IN_GUI_MyPrint_FLAG
 
     if USE_GUI_FLAG == 1:
         if EXIT_PROGRAM_FLAG == 0:
@@ -282,13 +288,18 @@ def GUI_update_clock():
             #########################################################
 
             #########################################################
-            if MyPrint_OPEN_FLAG == 1 and SHOW_IN_GUI_MyPrint_FLAG == 1:
-                MyPrint_ReubenPython2and3ClassObject.GUI_update_clock()
+            if EntryListWithBlinking_OPEN_FLAG == 1:
+                EntryListWithBlinking_ReubenPython2and3ClassObject.GUI_update_clock()
             #########################################################
 
             #########################################################
             if CSVdataLogger_OPEN_FLAG == 1 and SHOW_IN_GUI_CSVdataLogger_FLAG == 1:
                 CSVdataLogger_ReubenPython3ClassObject.GUI_update_clock()
+            #########################################################
+
+            #########################################################
+            if MyPrint_OPEN_FLAG == 1 and SHOW_IN_GUI_MyPrint_FLAG == 1:
+                MyPrint_ReubenPython2and3ClassObject.GUI_update_clock()
             #########################################################
 
             root.after(GUI_RootAfterCallbackInterval_Milliseconds, GUI_update_clock)
@@ -300,7 +311,7 @@ def GUI_update_clock():
 
 ##########################################################################################################
 ##########################################################################################################
-def ExitProgram_Callback():
+def ExitProgram_Callback(OptionalArugment = 0):
     global EXIT_PROGRAM_FLAG
 
     print("ExitProgram_Callback event fired!")
@@ -458,6 +469,9 @@ if __name__ == '__main__':
     global USE_Canon6dofFTsensorFH30020_FLAG
     USE_Canon6dofFTsensorFH30020_FLAG = 1
 
+    global USE_EntryListWithBlinking_FLAG
+    USE_EntryListWithBlinking_FLAG = 1
+
     global USE_MyPrint_FLAG
     USE_MyPrint_FLAG = 1
 
@@ -466,6 +480,9 @@ if __name__ == '__main__':
 
     global USE_CSVdataLogger_FLAG
     USE_CSVdataLogger_FLAG = 1
+
+    global USE_KEYBOARD_FLAG
+    USE_KEYBOARD_FLAG = 1
     #################################################
     #################################################
 
@@ -497,6 +514,20 @@ if __name__ == '__main__':
     GUI_PADY_Canon6dofFTsensorFH30020 = 1
     GUI_ROWSPAN_Canon6dofFTsensorFH30020 = 1
     GUI_COLUMNSPAN_Canon6dofFTsensorFH30020 = 1
+
+    global GUI_ROW_EntryListWithBlinking
+    global GUI_COLUMN_EntryListWithBlinking
+    global GUI_PADX_EntryListWithBlinking
+    global GUI_PADY_EntryListWithBlinking
+    global GUI_ROWSPAN_EntryListWithBlinking
+    global GUI_COLUMNSPAN_EntryListWithBlinking
+    GUI_ROW_EntryListWithBlinking = 1
+
+    GUI_COLUMN_EntryListWithBlinking = 0
+    GUI_PADX_EntryListWithBlinking = 1
+    GUI_PADY_EntryListWithBlinking = 1
+    GUI_ROWSPAN_EntryListWithBlinking = 1
+    GUI_COLUMNSPAN_EntryListWithBlinking = 1
 
     global GUI_ROW_CSVdataLogger
     global GUI_COLUMN_CSVdataLogger
@@ -607,6 +638,49 @@ if __name__ == '__main__':
     #################################################
     #################################################
 
+    ####################################################
+    ####################################################
+    global LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject
+
+    global LOWPASSFILTER_OPEN_FLAG
+    LOWPASSFILTER_OPEN_FLAG = -1
+
+    global LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject_MostRecentDict
+    LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject_MostRecentDict = dict()
+
+    global Raw_1
+    Raw_1 = 0.0
+
+    global Filtered_1
+    Filtered_1 = 0.0
+
+    global FTlist_LowPassFilterForDictsOfLists_ExponentialSmoothingFilterLambda
+    FTlist_LowPassFilterForDictsOfLists_ExponentialSmoothingFilterLambda = 0.98
+    ####################################################
+    ####################################################
+
+    #################################################
+    #################################################
+    global EntryListWithBlinking_ReubenPython2and3ClassObject
+
+    global EntryListWithBlinking_OPEN_FLAG
+    EntryListWithBlinking_OPEN_FLAG = -1
+
+    global EntryListWithBlinking_MostRecentDict
+    EntryListWithBlinking_MostRecentDict = dict()
+
+    global EntryListWithBlinking_MostRecentDict_DataUpdateNumber
+    EntryListWithBlinking_MostRecentDict_DataUpdateNumber = 0
+
+    global EntryListWithBlinking_MostRecentDict_DataUpdateNumber_last
+    EntryListWithBlinking_MostRecentDict_DataUpdateNumber_last = -1
+
+    EntryWidth = 10
+    LabelWidth = 40
+    FontSize = 8
+    #################################################
+    #################################################
+
     #################################################
     #################################################
     global MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject
@@ -666,13 +740,15 @@ if __name__ == '__main__':
     #################################################
     global Canon6dofFTsensorFH30020_setup_dict
     Canon6dofFTsensorFH30020_setup_dict = dict([("GUIparametersDict", Canon6dofFTsensorFH30020_GUIparametersDict),
-                                                                                ("DesiredSerialNumber_USBtoSerialConverter", "B0004EJRA"),
+                                                                                ("DesiredSerialNumber_USBtoSerialConverter", "FT8J8TNUA"),
+                                                                                ("SerialBaudRate", 115200), #[57600, 115200, 921600], A continuous output cycle changes according to a baud rate. 921600 bps: 2kHz, 115200bps:250Hz, 57600bps:125Hz.
                                                                                 ("NameToDisplay_UserSet", "Canon6dofFTsensorFH30020"),
                                                                                 ("DedicatedRxThread_TimeToSleepEachLoop", 0.001),
                                                                                 ("DedicatedTxThread_TimeToSleepEachLoop", 0.010),
                                                                                 ("DedicatedTxThread_TxMessageToSend_Queue_MaxSize", 1),
                                                                                 ("ResetTareAtStartOfProgramFlag", 1),
-                                                                                ("StreamingModeString", "Binary_Standard_Continuous")]) #Binary_Simple_Continuous, #Binary_Standard_Continuous
+                                                                                ("StreamingModeString", "Binary_Standard_Oneshot"), #Binary_Standard_Oneshot, #Binary_Standard_Continuous
+                                                                                ("FilterFrequencyCutoffHz", 1000)]) # 1, 5, 10, 50, 100, 500, 1000, 5000
     #################################################
 
     #################################################
@@ -683,11 +759,8 @@ if __name__ == '__main__':
 
         except:
             exceptions = sys.exc_info()[0]
-            print("Canon6dofFTsensorFH30020_ReubenPython3ClassObject __init__ on SerialNumber" +
-                  Canon6dofFTsensorFH30020_DevicesToReadSerialNumbersList[Index] +
-                  ", exceptions: %s" % exceptions)
-
-            traceback.print_exc()
+            print("Canon6dofFTsensorFH30020_ReubenPython3ClassObject __init__, exceptions: %s" % exceptions)
+            #traceback.print_exc()
     #################################################
 
     #################################################
@@ -732,7 +805,6 @@ if __name__ == '__main__':
 
     #################################################
     #################################################
-
     global CSVdataLogger_ReubenPython3ClassObject_setup_dict
     CSVdataLogger_ReubenPython3ClassObject_setup_dict = dict([("GUIparametersDict", CSVdataLogger_ReubenPython3ClassObject_GUIparametersDict),
                                                                                 ("NameToDisplay_UserSet", "CSVdataLogger"),
@@ -752,6 +824,65 @@ if __name__ == '__main__':
             print("CSVdataLogger_ReubenPython3ClassObject __init__: Exceptions: %s" % exceptions)
             traceback.print_exc()
     #################################################
+    #################################################
+    #################################################
+
+    ####################################################
+    ####################################################
+    try:
+        global LowPassFilterForDictsOfLists_DictOfVariableFilterSettings
+        LowPassFilterForDictsOfLists_DictOfVariableFilterSettings = dict([("FTlist", dict([("UseMedianFilterFlag", 1),
+                                                              ("UseExponentialSmoothingFilterFlag", 1),
+                                                              ("ExponentialSmoothingFilterLambda", FTlist_LowPassFilterForDictsOfLists_ExponentialSmoothingFilterLambda)]))]) #new_filtered_value = k * raw_sensor_value + (1 - k) * old_filtered_value
+
+        LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject_setup_dict = dict([("DictOfVariableFilterSettings", LowPassFilterForDictsOfLists_DictOfVariableFilterSettings)])
+
+        LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject = LowPassFilterForDictsOfLists_ReubenPython2and3Class(LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject_setup_dict)
+        LOWPASSFILTER_OPEN_FLAG = LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject.OBJECT_CREATED_SUCCESSFULLY_FLAG
+
+    except:
+        exceptions = sys.exc_info()[0]
+        print("LowPassFilterForDictsOfLists_ReubenPython2and3Class __init__: Exceptions: %s" % exceptions)
+    ####################################################
+    ####################################################
+
+    #################################################
+    #################################################
+    global EntryListWithBlinking_ReubenPython2and3ClassObject_GUIparametersDict
+    EntryListWithBlinking_ReubenPython2and3ClassObject_GUIparametersDict = dict([("root", Tab_MainControls),
+                                    ("UseBorderAroundThisGuiObjectFlag", 0),
+                                    ("GUI_ROW", GUI_ROW_EntryListWithBlinking),
+                                    ("GUI_COLUMN", GUI_COLUMN_EntryListWithBlinking),
+                                    ("GUI_PADX", GUI_PADX_EntryListWithBlinking),
+                                    ("GUI_PADY", GUI_PADY_EntryListWithBlinking),
+                                    ("GUI_ROWSPAN", GUI_ROWSPAN_EntryListWithBlinking),
+                                    ("GUI_COLUMNSPAN", GUI_COLUMNSPAN_EntryListWithBlinking)])
+
+    global EntryListWithBlinking_Variables_ListOfDicts
+    EntryListWithBlinking_Variables_ListOfDicts = [dict([("Name", "FTlist_LowPassFilterForDictsOfLists_ExponentialSmoothingFilterLambda"),
+                                                         ("Type", "float"),
+                                                         ("StartingVal", FTlist_LowPassFilterForDictsOfLists_ExponentialSmoothingFilterLambda),
+                                                         ("MinVal", 0.0),
+                                                         ("MaxVal", 1.0),
+                                                         ("EntryBlinkEnabled", 0),
+                                                         ("EntryWidth", EntryWidth),
+                                                         ("LabelWidth", LabelWidth),
+                                                         ("FontSize", FontSize)])]
+
+    global EntryListWithBlinking_ReubenPython2and3ClassObject_setup_dict
+    EntryListWithBlinking_ReubenPython2and3ClassObject_setup_dict = dict([("GUIparametersDict", EntryListWithBlinking_ReubenPython2and3ClassObject_GUIparametersDict),
+                                                                          ("EntryListWithBlinking_Variables_ListOfDicts", EntryListWithBlinking_Variables_ListOfDicts),
+                                                                          ("DebugByPrintingVariablesFlag", 0),
+                                                                          ("LoseFocusIfMouseLeavesEntryFlag", 0)])
+    if USE_EntryListWithBlinking_FLAG == 1:
+        try:
+            EntryListWithBlinking_ReubenPython2and3ClassObject = EntryListWithBlinking_ReubenPython2and3Class(EntryListWithBlinking_ReubenPython2and3ClassObject_setup_dict)
+            EntryListWithBlinking_OPEN_FLAG = EntryListWithBlinking_ReubenPython2and3ClassObject.OBJECT_CREATED_SUCCESSFULLY_FLAG
+
+        except:
+            exceptions = sys.exc_info()[0]
+            print("EntryListWithBlinking_ReubenPython2and3ClassObject __init__: Exceptions: %s" % exceptions, 0)
+            traceback.print_exc()
     #################################################
     #################################################
 
@@ -807,7 +938,7 @@ if __name__ == '__main__':
     global MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject_setup_dict
     MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject_setup_dict = dict([("GUIparametersDict", MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject_GUIparametersDict),
                                                                                         ("ParentPID", os.getpid()),
-                                                                                        ("WatchdogTimerExpirationDurationSeconds_StandAlonePlottingProcess", 0.0),
+                                                                                        ("WatchdogTimerExpirationDurationSeconds_StandAlonePlottingProcess", 5.0),
                                                                                         ("MarkerSize", 3),
                                                                                         ("CurvesToPlotNamesAndColorsDictOfLists",
                                                                                             dict([("NameList", MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject_NameList),
@@ -821,8 +952,8 @@ if __name__ == '__main__':
                                                                                         ("YaxisAutoscaleFlag", 1),
                                                                                         ("X_min", 0.0),
                                                                                         ("X_max", 20.0),
-                                                                                        ("Y_min", -0.0015),
-                                                                                        ("Y_max", 0.0015),
+                                                                                        ("Y_min", -0.02),
+                                                                                        ("Y_max", 0.02),
                                                                                         ("XaxisDrawnAtBottomOfGraph", 0),
                                                                                         ("XaxisLabelString", "Time (sec)"),
                                                                                         ("YaxisLabelString", "Y-units (units)"),
@@ -840,6 +971,13 @@ if __name__ == '__main__':
     #################################################
     #################################################
 
+    #################################################
+    #################################################
+    if USE_KEYBOARD_FLAG == 1:
+        keyboard.on_press_key("esc", ExitProgram_Callback)
+        #keyboard.on_press_key("space", ExitProgram_Callback)
+        #keyboard.on_press_key("e", ExitProgram_Callback)
+        keyboard.on_press_key("q", ExitProgram_Callback)
     #################################################
     #################################################
 
@@ -867,6 +1005,22 @@ if __name__ == '__main__':
     #################################################
     #################################################
 
+    ####################################################
+    ####################################################
+    if LOWPASSFILTER_OPEN_FLAG != 1:
+        print("Failed to open LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject.")
+        #ExitProgram_Callback()
+    ####################################################
+    ####################################################
+
+    #################################################
+    #################################################
+    if EntryListWithBlinking_OPEN_FLAG != 1:
+        print("Failed to open EntryListWithBlinking_ReubenPython2and3Class.")
+        #ExitProgram_Callback()
+    #################################################
+    #################################################
+
     #################################################
     #################################################
     if USE_MyPlotterPureTkinterStandAloneProcess_FLAG == 1 and MyPlotterPureTkinterStandAloneProcess_OPEN_FLAG != 1:
@@ -888,6 +1042,34 @@ if __name__ == '__main__':
         ###################################################
         ###################################################
 
+        ####################################################
+        ####################################################
+
+        ################################################### GET's
+        if EntryListWithBlinking_OPEN_FLAG == 1:
+
+            EntryListWithBlinking_MostRecentDict = EntryListWithBlinking_ReubenPython2and3ClassObject.GetMostRecentDataDict()
+
+            if "DataUpdateNumber" in EntryListWithBlinking_MostRecentDict and EntryListWithBlinking_MostRecentDict["DataUpdateNumber"] != EntryListWithBlinking_MostRecentDict_DataUpdateNumber_last:
+                EntryListWithBlinking_MostRecentDict_DataUpdateNumber = EntryListWithBlinking_MostRecentDict["DataUpdateNumber"]
+                #print("DataUpdateNumber = " + str(EntryListWithBlinking_MostRecentDict_DataUpdateNumber) + ", EntryListWithBlinking_MostRecentDict: " + str(EntryListWithBlinking_MostRecentDict))
+
+                if EntryListWithBlinking_MostRecentDict_DataUpdateNumber > 1:
+                    FTlist_LowPassFilterForDictsOfLists_ExponentialSmoothingFilterLambda = EntryListWithBlinking_MostRecentDict["FTlist_LowPassFilterForDictsOfLists_ExponentialSmoothingFilterLambda"]
+
+                    if LOWPASSFILTER_OPEN_FLAG == 1:
+                        LowPassFilterForDictsOfLists_DictOfVariableFilterSettings["FTlist"]["ExponentialSmoothingFilterLambda"] = FTlist_LowPassFilterForDictsOfLists_ExponentialSmoothingFilterLambda
+                        LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject.AddOrUpdateDictOfVariableFilterSettingsFromExternalProgram(LowPassFilterForDictsOfLists_DictOfVariableFilterSettings)
+
+        ###################################################
+
+        ###################################################
+        EntryListWithBlinking_MostRecentDict_DataUpdateNumber_last = EntryListWithBlinking_MostRecentDict_DataUpdateNumber
+        ###################################################
+
+        ####################################################
+        ####################################################
+
         ################################################### GET's
         ###################################################
         if Canon6dofFTsensorFH30020_OPEN_FLAG == 1:
@@ -898,9 +1080,26 @@ if __name__ == '__main__':
             if "Time" in Canon6dofFTsensorFH30020_MostRecentDict:
                 Canon6dofFTsensorFH30020_MostRecentDict_Time = Canon6dofFTsensorFH30020_MostRecentDict["Time"]
                 Canon6dofFTsensorFH30020_MostRecentDict_FTlist = Canon6dofFTsensorFH30020_MostRecentDict["FTlist"]
-                #print("Time: " + str(Time))
+                #print("Time: " + str(Canon6dofFTsensorFH30020_MostRecentDict_Time) + ", FTlist: " + str(Canon6dofFTsensorFH30020_MostRecentDict_FTlist))
+
         ###################################################
         ###################################################
+
+        #################################################### GET's
+        ####################################################
+        if LOWPASSFILTER_OPEN_FLAG == 1:
+
+            LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject.AddDataDictFromExternalProgram(dict([("FTlist", Canon6dofFTsensorFH30020_MostRecentDict_FTlist)])) #Update data
+
+            LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject_MostRecentDict = LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject.GetMostRecentDataDict() #Get latest data
+            #print("LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject_MostRecentDict: " + str(LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject_MostRecentDict))
+
+            if "FTlist" in LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject_MostRecentDict:
+                Raw_1 = LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject_MostRecentDict["FTlist"]["Raw_MostRecentValuesList"]
+                Filtered_1 = LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject_MostRecentDict["FTlist"]["Filtered_MostRecentValuesList"]
+
+        ####################################################
+        ####################################################
 
         ################################################### SET's
         ###################################################
@@ -936,23 +1135,32 @@ if __name__ == '__main__':
         #################################################### SET's
         ####################################################
         if MyPlotterPureTkinterStandAloneProcess_OPEN_FLAG == 1:
+            try:
+                ####################################################
+                MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject_MostRecentDict = MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject.GetMostRecentDataDict()
 
-            ####################################################
-            MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject_MostRecentDict = MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject.GetMostRecentDataDict()
+                if "StandAlonePlottingProcess_ReadyForWritingFlag" in MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject_MostRecentDict:
+                    MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject_MostRecentDict_StandAlonePlottingProcess_ReadyForWritingFlag = MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject_MostRecentDict["StandAlonePlottingProcess_ReadyForWritingFlag"]
 
-            if "StandAlonePlottingProcess_ReadyForWritingFlag" in MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject_MostRecentDict:
-                MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject_MostRecentDict_StandAlonePlottingProcess_ReadyForWritingFlag = MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject_MostRecentDict["StandAlonePlottingProcess_ReadyForWritingFlag"]
+                    if MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject_MostRecentDict_StandAlonePlottingProcess_ReadyForWritingFlag == 1:
+                        if CurrentTime_MainLoopThread - LastTime_MainLoopThread_MyPlotterPureTkinterStandAloneProcess >= 0.030:
+                            #MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject.ExternalAddPointOrListOfPointsToPlot(["Fx_N", "Fy_N", "Fz_N"],
+                            #                                                                                                        [CurrentTime_MainLoopThread]*3,
+                            #                                                                                                        [Canon6dofFTsensorFH30020_MostRecentDict_FTlist[0], Canon6dofFTsensorFH30020_MostRecentDict_FTlist[1], Canon6dofFTsensorFH30020_MostRecentDict_FTlist[2]])
 
-                if MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject_MostRecentDict_StandAlonePlottingProcess_ReadyForWritingFlag == 1:
-                    if CurrentTime_MainLoopThread - LastTime_MainLoopThread_MyPlotterPureTkinterStandAloneProcess >= 0.030:
-                        MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject.ExternalAddPointOrListOfPointsToPlot(["Fx_N", "Fy_N", "Fz_N"],
-                                                                                                                                [CurrentTime_MainLoopThread]*3,
-                                                                                                                                [Canon6dofFTsensorFH30020_MostRecentDict_FTlist[0], Canon6dofFTsensorFH30020_MostRecentDict_FTlist[1], Canon6dofFTsensorFH30020_MostRecentDict_FTlist[2]])
+                            #print(Raw_1)
+                            MyPlotterPureTkinterStandAloneProcess_ReubenPython2and3ClassObject.ExternalAddPointOrListOfPointsToPlot(["Fx_N", "Fz_N"],
+                                                                                                                                    [CurrentTime_MainLoopThread]*2,
+                                                                                                                                    [Raw_1[2], Filtered_1[2]])
 
 
-                        LastTime_MainLoopThread_MyPlotterPureTkinterStandAloneProcess = CurrentTime_MainLoopThread
-            ####################################################
+                            LastTime_MainLoopThread_MyPlotterPureTkinterStandAloneProcess = CurrentTime_MainLoopThread
+                ####################################################
 
+            except:
+                exceptions = sys.exc_info()[0]
+                print("test_program_for_Canon6dofFTsensorFH30020_ReubenPython3Class, if MyPlotterPureTkinterStandAloneProcess_OPEN_FLAG == 1: SET's, Exceptions: %s" % exceptions)
+                # traceback.print_exc()
         ####################################################
         ####################################################
 
@@ -977,6 +1185,16 @@ if __name__ == '__main__':
     #################################################
     if CSVdataLogger_OPEN_FLAG == 1:
         CSVdataLogger_ReubenPython3ClassObject.ExitProgram_Callback()
+    #################################################
+
+    #################################################
+    if LOWPASSFILTER_OPEN_FLAG == 1:
+        LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject.ExitProgram_Callback()
+    #################################################
+
+    #################################################
+    if EntryListWithBlinking_OPEN_FLAG == 1:
+        EntryListWithBlinking_ReubenPython2and3ClassObject.ExitProgram_Callback()
     #################################################
 
     #################################################

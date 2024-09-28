@@ -5,7 +5,7 @@ Reuben Brewer, Ph.D.
 reuben.brewer@gmail.com
 www.reubotics.com
 
-Software Revision B, 07/31/2024
+Software Revision C, 09/27/2024
 
 Verified working on: Python 3.11 for Windows 11 64-bit and Raspberry Pi Buster (may work on Mac in non-GUI mode, but haven't tested yet).
 '''
@@ -93,7 +93,6 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         self.SerialObject = serial.Serial()
         self.SerialConnectedFlag = 0
-        self.SerialBaudRate = 115200
         self.SerialTimeoutSeconds = 0.5
         self.SerialParity = serial.PARITY_NONE
         self.SerialStopBits = serial.STOPBITS_ONE
@@ -128,6 +127,7 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
         #########################################################
 
         self.Checksum_ErrorCounter = 0
+        self.FilterFrequencyHz_Received = -1
 
         '''
         ４-４-１. Standard Binary Output: A total of 21 bytes are output for each output.
@@ -145,8 +145,18 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
                                                                             #("ASCII_Simple_Oneshot", dict([("NumberOfBytesPerMessage", 30), ("SerialCommandToStartContinuousStreaming", "R")])),
                                                                             #("ASCII_Simple_Continuous", dict([("NumberOfBytesPerMessage", 30), ("SerialCommandToStartContinuousStreaming", "S")]))])
 
+        self.FilterFrequencyCutoffHzAcceptableValuesAndSettingsDict = dict([(1, dict([("SerialCommandToSetFilterFrequencyCutoffHz", "7")])),
+                                                                    (5, dict([("SerialCommandToSetFilterFrequencyCutoffHz", "6")])),
+                                                                    (10, dict([("SerialCommandToSetFilterFrequencyCutoffHz", "5")])),
+                                                                    (50, dict([("SerialCommandToSetFilterFrequencyCutoffHz", "4")])),
+                                                                    (100, dict([("SerialCommandToSetFilterFrequencyCutoffHz", "3")])),
+                                                                    (500, dict([("SerialCommandToSetFilterFrequencyCutoffHz", "2")])),
+                                                                    (1000, dict([("SerialCommandToSetFilterFrequencyCutoffHz", "1")])),
+                                                                    (5000, dict([("SerialCommandToSetFilterFrequencyCutoffHz", "0")]))])
+
         print("self.StreamingModeAcceptableValuesAndSettingsDict: " + str(self.StreamingModeAcceptableValuesAndSettingsDict))
 
+        self.SerialBaudRateAcceptableValues = [57600, 115200, 921600]
         #########################################################
         #########################################################
 
@@ -158,6 +168,9 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         self.ResetTare_EventNeedsToBeFiredFlag = 0
         self.ResetTare_EventHasHappenedFlag = 0
+
+        self.SetFilterFrequencyCutoffHz_EventNeedsToBeFiredFlag = 1 #Set to 1 so that the filter will get set at the start of the program
+        self.SetFilterFrequencyCutoffHz_EventHasHappenedFlag = 0
 
         self.FlushSerial_EventNeedsToBeFiredFlag = 0
         
@@ -355,6 +368,22 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         #########################################################
         #########################################################
+        if "SerialBaudRate" in setup_dict:
+            self.SerialBaudRate = int(self.PassThroughFloatValuesInRange_ExitProgramOtherwise("SerialBaudRate", setup_dict["SerialBaudRate"], self.SerialBaudRateAcceptableValues[0], self.SerialBaudRateAcceptableValues[-1]))
+
+            if self.SerialBaudRate not in self.SerialBaudRateAcceptableValues:
+                print("Canon6dofFTsensorFH30020_ReubenPython3Class __init__: Error, SerialBaudRate must be contained in the set " + str(self.SerialBaudRateAcceptableValues))
+                return
+
+        else:
+            self.SerialBaudRate = self.SerialBaudRateAcceptableValues[-1]
+
+        print("Canon6dofFTsensorFH30020_ReubenPython3Class __init__: SerialBaudRate: " + str(self.SerialBaudRate))
+        #########################################################
+        #########################################################
+
+        #########################################################
+        #########################################################
         if "NameToDisplay_UserSet" in setup_dict:
             self.NameToDisplay_UserSet = str(setup_dict["NameToDisplay_UserSet"])
         else:
@@ -420,6 +449,22 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         #########################################################
         #########################################################
+        if "FilterFrequencyCutoffHz" in setup_dict:
+            self.FilterFrequencyCutoffHz = int(self.PassThroughFloatValuesInRange_ExitProgramOtherwise("FilterFrequencyCutoffHz", setup_dict["FilterFrequencyCutoffHz"], 1, 5000))
+
+            if self.FilterFrequencyCutoffHz not in self.FilterFrequencyCutoffHzAcceptableValuesAndSettingsDict:
+                print("Canon6dofFTsensorFH30020_ReubenPython3Class __init__: Error, FilterFrequencyCutoffHz must be contained in the set " + str(self.FilterFrequencyCutoffHzAcceptableValuesAndSettingsDict))
+                return
+
+        else:
+            self.FilterFrequencyCutoffHz = 1000
+
+        print("Canon6dofFTsensorFH30020_ReubenPython3Class __init__: FilterFrequencyCutoffHz: " + str(self.FilterFrequencyCutoffHz))
+        #########################################################
+        #########################################################
+
+        #########################################################
+        #########################################################
 
         #########################################################
         #new_filtered_value = k * raw_sensor_value + (1 - k) * old_filtered_value
@@ -479,6 +524,12 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
         #########################################################
         self.DedicatedRxThread_ThreadingObject = threading.Thread(target=self.DedicatedRxThread, args=())
         self.DedicatedRxThread_ThreadingObject.start()
+        #########################################################
+        #########################################################
+
+        #########################################################
+        #########################################################
+        time.sleep(0.1) #unicorn, delay Tx thread so that Rx thread can get ready to read from serial device and not miss any filter queries from the sensor
         #########################################################
         #########################################################
 
@@ -983,6 +1034,69 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
     ##########################################################################################################
     ##########################################################################################################
+    def SetFilterFrequencyCutoffHz(self, FilterFrequencyCutoffHz, SendImmediatelyInsteadOfAddingToQueueFlag = 1):
+
+        if self.SerialConnectedFlag == 1:
+            try:
+
+                if FilterFrequencyCutoffHz in self.FilterFrequencyCutoffHzAcceptableValuesAndSettingsDict:
+
+                    StringToTx = self.FilterFrequencyCutoffHzAcceptableValuesAndSettingsDict[FilterFrequencyCutoffHz]["SerialCommandToSetFilterFrequencyCutoffHz"]
+
+                    if SendImmediatelyInsteadOfAddingToQueueFlag == 0:
+                        self.DedicatedTxThread_TxMessageToSend_Queue.put(StringToTx)
+                    else:
+                        self.SendSerialStrToTx(StringToTx + "/r")
+
+                    self.SetFilterFrequencyCutoffHz_EventHasHappenedFlag = 1
+
+                    print("SetFilterFrequencyCutoffHz event happened, StringToTx: " + str(StringToTx))
+
+                    return 1
+
+                else:
+                    print("SetFilterFrequencyCutoffHz: Error, FilterFrequencyCutoffHz = " + str(FilterFrequencyCutoffHz) + " is not within set " + str(self.FilterFrequencyCutoffHzAcceptableValuesAndSettingsDict))
+                    return 0
+
+            except:
+                exceptions = sys.exc_info()[0]
+                print("SetFilterFrequencyCutoffHz, exceptions: %s" % exceptions)
+
+        else:
+            print("SetFilterFrequencyCutoffHz: Error, SerialConnectedFlag = 0, cannot issue command.")
+            return 0
+    ##########################################################################################################
+    ##########################################################################################################
+
+    ##########################################################################################################
+    ##########################################################################################################
+    def GetFilterFrequencyCutoffHz(self, SendImmediatelyInsteadOfAddingToQueueFlag = 1):
+
+        if self.SerialConnectedFlag == 1:
+            try:
+
+                StringToTx = "F"
+
+                if SendImmediatelyInsteadOfAddingToQueueFlag == 0:
+                    self.DedicatedTxThread_TxMessageToSend_Queue.put(StringToTx)
+                else:
+                    self.SendSerialStrToTx(StringToTx + "/r")
+
+                print("GetFilterFrequencyCutoffHz event fired!")
+                return 1
+
+            except:
+                exceptions = sys.exc_info()[0]
+                print("GetFilterFrequencyCutoffHz, exceptions: %s" % exceptions)
+
+        else:
+            print("GetFilterFrequencyCutoffHz: Error, SerialConnectedFlag = 0, cannot issue command.")
+            return 0
+    ##########################################################################################################
+    ##########################################################################################################
+
+    ##########################################################################################################
+    ##########################################################################################################
     def ConvertForceFromIntegerToN(self, InputValue, SimpleFlag = 1):
 
         try:
@@ -1062,6 +1176,12 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
             ##########################################################################################################
 
             ##########################################################################################################
+            if self.SetFilterFrequencyCutoffHz_EventNeedsToBeFiredFlag == 0 and self.SetFilterFrequencyCutoffHz_EventHasHappenedFlag == 0:
+                if self.StreamingModeString.find("Oneshot") != -1:
+                    self.StartVariableStreaming(self.StreamingModeString) #Have to Tx a query to get new data if we're in Oneshot mode
+            ##########################################################################################################
+
+            ##########################################################################################################
             if self.FlushSerial_EventNeedsToBeFiredFlag == 1:
                 self.SerialObject.reset_input_buffer()
                 self.FlushSerial_EventNeedsToBeFiredFlag = 0
@@ -1071,6 +1191,22 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
             if self.ResetTare_EventNeedsToBeFiredFlag == 1:
                 self.ResetTare()
                 self.ResetTare_EventNeedsToBeFiredFlag = 0
+            ##########################################################################################################
+
+            ##########################################################################################################
+            if self.SetFilterFrequencyCutoffHz_EventNeedsToBeFiredFlag == 0 and self.SetFilterFrequencyCutoffHz_EventHasHappenedFlag == 1:
+                for Counter in range(0, 2):
+                    self.GetFilterFrequencyCutoffHz() #DO THIS BEFORE SetFilterFrequencyCutoffHz
+                    #time.sleep(0.002)
+                self.SetFilterFrequencyCutoffHz_EventHasHappenedFlag = 0
+            ##########################################################################################################
+
+            ##########################################################################################################
+            if self.SetFilterFrequencyCutoffHz_EventNeedsToBeFiredFlag == 1 and self.SetFilterFrequencyCutoffHz_EventHasHappenedFlag == 0:
+                for Counter in range(0, 1):
+                    self.SetFilterFrequencyCutoffHz(self.FilterFrequencyCutoffHz)
+                    #time.sleep(0.002)
+                self.SetFilterFrequencyCutoffHz_EventNeedsToBeFiredFlag = 0
             ##########################################################################################################
 
             ##########################################################################################################
@@ -1157,7 +1293,12 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
                 ##########################################################################################################
                 ##########################################################################################################
-                NumberOfBytesPerMessage = self.StreamingModeAcceptableValuesAndSettingsDict[self.StreamingModeString]["NumberOfBytesPerMessage"]
+                if self.SetFilterFrequencyCutoffHz_EventHasHappenedFlag == 1 or self.SetFilterFrequencyCutoffHz_EventNeedsToBeFiredFlag == 1: #Look at both flags, not just 1.
+                    NumberOfBytesPerMessage = 30*2 #Maybe needs to be higher, more like 30
+                else:
+                    NumberOfBytesPerMessage = self.StreamingModeAcceptableValuesAndSettingsDict[self.StreamingModeString]["NumberOfBytesPerMessage"]
+
+                #print("NumberOfBytesPerMessage: " + str(NumberOfBytesPerMessage))
                 ##########################################################################################################
                 ##########################################################################################################
 
@@ -1192,7 +1333,7 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
                         ##########################################################################################################
                         ##########################################################################################################
-                        RxMessageString = RxMessage #self.ConvertBytesObjectToString(RxMessage)
+                        RxMessageString = str(RxMessage)
                         ##########################################################################################################
                         ##########################################################################################################
 
@@ -1202,6 +1343,31 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
                             print("RxMessage Len = " + str(len(RxMessage)),
                                   ", ByteLen = " + str(len(RxMessage)) +
                                   ", Message = " + str(RxMessage))
+                        ##########################################################################################################
+                        ##########################################################################################################
+
+                        ##########################################################################################################
+                        ##########################################################################################################
+                        MatchIndex_1 = RxMessageString.find("Cutoff frequency: ")
+                        MatchIndex_2 = RxMessageString.find("Hz")
+                        if MatchIndex_1 != -1 and MatchIndex_2 != -1:
+
+                            FilterFrequencyHz_Received_Str = RxMessageString[MatchIndex_1:MatchIndex_2+2]
+                            print("FilterFrequencyHz_Received_Str: " + str(FilterFrequencyHz_Received_Str))
+
+                            FilterFrequencyHz_Received_Str = str(FilterFrequencyHz_Received_Str.replace("Cutoff frequency: ","").replace("Hz","").replace("b","").replace("'","")) #Why is the string including the b' ' ?
+                            try:
+                                self.FilterFrequencyHz_Received = int(FilterFrequencyHz_Received_Str)
+                            except:
+                                #self.FilterFrequencyHz_Received = -1
+                                pass
+
+                            print("RxMessageString: " + RxMessageString + ", FilterFrequencyHz_Received_Str: " + str(FilterFrequencyHz_Received_Str) + ", len = " + str(len(FilterFrequencyHz_Received_Str)) + ", type = " + str(type(FilterFrequencyHz_Received_Str)))
+                            #for i in FilterFrequencyHz_Received_Str:
+                            #    print(i)
+                            print("FilterFrequencyHz_Received: " + str(self.FilterFrequencyHz_Received))
+
+                            self.FlushSerial_EventNeedsToBeFiredFlag = 1
                         ##########################################################################################################
                         ##########################################################################################################
 
@@ -1268,7 +1434,7 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
                             else:
                                 NewDataFlag = 0
                                 self.Checksum_ErrorCounter = self.Checksum_ErrorCounter + 1
-                                print("Canon6dofFTsensorFH30020_ReubenPython3Class: CHECKSUM ERROR")
+                                #print("Canon6dofFTsensorFH30020_ReubenPython3Class: CHECKSUM ERROR") #unicorn
                             ##########################################################################################################
 
                             ##########################################################################################################
@@ -1291,6 +1457,8 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
                                 self.MostRecentDataDict["ResetTare_EventHasHappenedFlag"] = self.ResetTare_EventHasHappenedFlag
 
                                 self.MostRecentDataDict["Checksum_ErrorCounter"] = self.Checksum_ErrorCounter
+
+                                self.MostRecentDataDict["FilterFrequencyHz_Received"] = self.FilterFrequencyHz_Received
                             ##########################################################################################################
 
                             ##########################################################################################################
@@ -1308,10 +1476,20 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
                         ##########################################################################################################
                         ##########################################################################################################
 
+                        ##########################################################################################################
+                        ##########################################################################################################
+                        else:
+                            if self.PrintAllReceivedSerialMessageForDebuggingFlag == 1:
+                                print("RxMessage Len = " + str(len(RxMessage)),
+                                      ", ByteLen = " + str(len(RxMessage)) +
+                                      ", Message = " + str(RxMessage))
+                        ##########################################################################################################
+                        ##########################################################################################################
+
                 except:
                     exceptions = sys.exc_info()[0]
                     print("DedicatedRxThread, RxMessage: " + str(RxMessage) + ", Exceptions: %s" % exceptions)
-                    #traceback.print_exc()
+                    traceback.print_exc()
                 ##########################################################################################################
                 ##########################################################################################################
                 ##########################################################################################################
@@ -1434,6 +1612,13 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
         self.FlushSerial_Button.grid(row=0, column=1, padx=10, pady=10, columnspan=1, rowspan=1)
         #################################################
         #################################################
+        
+        #################################################
+        #################################################
+        self.SetFilterFrequencyCutoffHz_Button = Button(self.ButtonsFrame, text="SetFilterHz", state="normal", width=20, command=lambda: self.SetFilterFrequencyCutoffHz_Button_Response())
+        self.SetFilterFrequencyCutoffHz_Button.grid(row=0, column=2, padx=10, pady=10, columnspan=1, rowspan=1)
+        #################################################
+        #################################################
 
         #################################################
         #################################################
@@ -1488,6 +1673,16 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
         self.FlushSerial_EventNeedsToBeFiredFlag = 1
 
         #self.MyPrint_WithoutLogFile("FlushSerial_Button_Response: Event fired!")
+
+    ##########################################################################################################
+    ##########################################################################################################
+
+    ##########################################################################################################
+    ##########################################################################################################
+    def SetFilterFrequencyCutoffHz_Button_Response(self):
+
+        self.SetFilterFrequencyCutoffHz_EventNeedsToBeFiredFlag = 1
+        self.SetFilterFrequencyCutoffHz_EventHasHappenedFlag = 0
 
     ##########################################################################################################
     ##########################################################################################################
