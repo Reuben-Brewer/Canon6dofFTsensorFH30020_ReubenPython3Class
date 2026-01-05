@@ -5,12 +5,20 @@ Reuben Brewer, Ph.D.
 reuben.brewer@gmail.com
 www.reubotics.com
 
-Software Revision C, 09/27/2024
+Software Revision D, 01/05/2026
 
-Verified working on: Python 3.11 for Windows 11 64-bit and Raspberry Pi Buster (may work on Mac in non-GUI mode, but haven't tested yet).
+Verified working on: Python 3.11/12/13 for Windows 10/11 64-bit and Raspberry Pi Bookworm (may work on Mac in non-GUI mode, but haven't tested yet).
 '''
 
 __author__ = 'reuben.brewer'
+
+##########################################################################################################
+##########################################################################################################
+
+##########################################
+import ReubenGithubCodeModulePaths #Replaces the need to have "ReubenGithubCodeModulePaths.pth" within "C:\Anaconda3\Lib\site-packages".
+ReubenGithubCodeModulePaths.Enable()
+##########################################
 
 ##########################################
 from LowPassFilterForDictsOfLists_ReubenPython2and3Class import *
@@ -27,6 +35,7 @@ import collections
 from copy import * #for deepcopy
 import inspect #To enable 'TellWhichFileWereIn'
 import threading
+import queue as Queue
 import traceback
 #import binascii
 ##########################################
@@ -38,14 +47,6 @@ from tkinter import ttk
 ##########################################
 
 ##########################################
-import queue as Queue
-##########################################
-
-##########################################
-from future.builtins import input as input
-########################################## "sudo pip3 install future" (Python 3)
-
-##########################################
 import platform
 if platform.system() == "Windows":
     import ctypes
@@ -53,14 +54,12 @@ if platform.system() == "Windows":
     winmm.timeBeginPeriod(1) #Set minimum timer resolution to 1ms so that time.sleep(0.001) behaves properly.
 ##########################################
 
-#########################################################
-
-##########################
+##########################################
 import serial #___IMPORTANT: pip install pyserial (NOT pip install serial).
 from serial.tools import list_ports
-##########################
+##########################################
 
-##########################
+##########################################
 global ftd2xx_IMPORTED_FLAG
 ftd2xx_IMPORTED_FLAG = 0
 try:
@@ -72,15 +71,16 @@ except:
     print("**********")
     print("********** Canon6dofFTsensorFH30020_ReubenPython3Class __init__: ERROR, failed to import ftdtxx, Exceptions: %s" % exceptions + " ********** ")
     print("**********")
-##########################
+##########################################
 
-#########################################################
+##########################################################################################################
+##########################################################################################################
 
 class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter Frame
 
     ##########################################################################################################
     ##########################################################################################################
-    def __init__(self, setup_dict): #Subclass the Tkinter Frame
+    def __init__(self, SetupDict): #Subclass the Tkinter Frame
 
         print("#################### Canon6dofFTsensorFH30020_ReubenPython3Class __init__ starting. ####################")
 
@@ -200,8 +200,8 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         #########################################################
         #########################################################
-        if "GUIparametersDict" in setup_dict:
-            self.GUIparametersDict = setup_dict["GUIparametersDict"]
+        if "GUIparametersDict" in SetupDict:
+            self.GUIparametersDict = SetupDict["GUIparametersDict"]
 
             #########################################################
             #########################################################
@@ -211,16 +211,6 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
                 self.USE_GUI_FLAG = 0
 
             print("Canon6dofFTsensorFH30020_ReubenPython3Class __init__: USE_GUI_FLAG: " + str(self.USE_GUI_FLAG))
-            #########################################################
-            #########################################################
-
-            #########################################################
-            #########################################################
-            if "root" in self.GUIparametersDict:
-                self.root = self.GUIparametersDict["root"]
-            else:
-                print("Canon6dofFTsensorFH30020_ReubenPython3Class __init__: ERROR, must pass in 'root'")
-                return
             #########################################################
             #########################################################
 
@@ -355,8 +345,8 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         #########################################################
         #########################################################
-        if "DesiredSerialNumber_USBtoSerialConverter" in setup_dict:
-            self.DesiredSerialNumber_USBtoSerialConverter = setup_dict["DesiredSerialNumber_USBtoSerialConverter"]
+        if "DesiredSerialNumber_USBtoSerialConverter" in SetupDict:
+            self.DesiredSerialNumber_USBtoSerialConverter = SetupDict["DesiredSerialNumber_USBtoSerialConverter"]
 
         else:
             print("Canon6dofFTsensorFH30020_ReubenPython3Class __init__: ERROR, must initialize object with 'DesiredSerialNumber_USBtoSerialConverter' argument.")
@@ -368,8 +358,8 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         #########################################################
         #########################################################
-        if "SerialBaudRate" in setup_dict:
-            self.SerialBaudRate = int(self.PassThroughFloatValuesInRange_ExitProgramOtherwise("SerialBaudRate", setup_dict["SerialBaudRate"], self.SerialBaudRateAcceptableValues[0], self.SerialBaudRateAcceptableValues[-1]))
+        if "SerialBaudRate" in SetupDict:
+            self.SerialBaudRate = int(self.PassThroughFloatValuesInRange_ExitProgramOtherwise("SerialBaudRate", SetupDict["SerialBaudRate"], self.SerialBaudRateAcceptableValues[0], self.SerialBaudRateAcceptableValues[-1]))
 
             if self.SerialBaudRate not in self.SerialBaudRateAcceptableValues:
                 print("Canon6dofFTsensorFH30020_ReubenPython3Class __init__: Error, SerialBaudRate must be contained in the set " + str(self.SerialBaudRateAcceptableValues))
@@ -384,8 +374,8 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         #########################################################
         #########################################################
-        if "NameToDisplay_UserSet" in setup_dict:
-            self.NameToDisplay_UserSet = str(setup_dict["NameToDisplay_UserSet"])
+        if "NameToDisplay_UserSet" in SetupDict:
+            self.NameToDisplay_UserSet = str(SetupDict["NameToDisplay_UserSet"])
         else:
             self.NameToDisplay_UserSet = ""
 
@@ -395,8 +385,8 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         #########################################################
         #########################################################
-        if "DedicatedRxThread_TimeToSleepEachLoop" in setup_dict:
-            self.DedicatedRxThread_TimeToSleepEachLoop = self.PassThroughFloatValuesInRange_ExitProgramOtherwise("DedicatedRxThread_TimeToSleepEachLoop", setup_dict["DedicatedRxThread_TimeToSleepEachLoop"], 0.001, 100000)
+        if "DedicatedRxThread_TimeToSleepEachLoop" in SetupDict:
+            self.DedicatedRxThread_TimeToSleepEachLoop = self.PassThroughFloatValuesInRange_ExitProgramOtherwise("DedicatedRxThread_TimeToSleepEachLoop", SetupDict["DedicatedRxThread_TimeToSleepEachLoop"], 0.001, 100000)
 
         else:
             self.DedicatedRxThread_TimeToSleepEachLoop = 0.005
@@ -407,8 +397,8 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         #########################################################
         #########################################################
-        if "DedicatedTxThread_TimeToSleepEachLoop" in setup_dict:
-            self.DedicatedTxThread_TimeToSleepEachLoop = self.PassThroughFloatValuesInRange_ExitProgramOtherwise("DedicatedTxThread_TimeToSleepEachLoop", setup_dict["DedicatedTxThread_TimeToSleepEachLoop"], 0.001, 100000)
+        if "DedicatedTxThread_TimeToSleepEachLoop" in SetupDict:
+            self.DedicatedTxThread_TimeToSleepEachLoop = self.PassThroughFloatValuesInRange_ExitProgramOtherwise("DedicatedTxThread_TimeToSleepEachLoop", SetupDict["DedicatedTxThread_TimeToSleepEachLoop"], 0.001, 100000)
 
         else:
             self.DedicatedTxThread_TimeToSleepEachLoop = 0.005
@@ -419,8 +409,8 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         #########################################################
         #########################################################
-        if "ResetTareAtStartOfProgramFlag" in setup_dict:
-            self.ResetTareAtStartOfProgramFlag = self.PassThrough0and1values_ExitProgramOtherwise("ResetTareAtStartOfProgramFlag", setup_dict["ResetTareAtStartOfProgramFlag"])
+        if "ResetTareAtStartOfProgramFlag" in SetupDict:
+            self.ResetTareAtStartOfProgramFlag = self.PassThrough0and1values_ExitProgramOtherwise("ResetTareAtStartOfProgramFlag", SetupDict["ResetTareAtStartOfProgramFlag"])
         else:
             self.ResetTareAtStartOfProgramFlag = 1
 
@@ -430,8 +420,8 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         #########################################################
         #########################################################
-        if "StreamingModeString" in setup_dict:
-            StreamingModeString_temp = setup_dict["StreamingModeString"]
+        if "StreamingModeString" in SetupDict:
+            StreamingModeString_temp = SetupDict["StreamingModeString"]
 
             if StreamingModeString_temp in self.StreamingModeAcceptableValuesAndSettingsDict:
                 self.StreamingModeString = StreamingModeString_temp
@@ -449,8 +439,8 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         #########################################################
         #########################################################
-        if "FilterFrequencyCutoffHz" in setup_dict:
-            self.FilterFrequencyCutoffHz = int(self.PassThroughFloatValuesInRange_ExitProgramOtherwise("FilterFrequencyCutoffHz", setup_dict["FilterFrequencyCutoffHz"], 1, 5000))
+        if "FilterFrequencyCutoffHz" in SetupDict:
+            self.FilterFrequencyCutoffHz = int(self.PassThroughFloatValuesInRange_ExitProgramOtherwise("FilterFrequencyCutoffHz", SetupDict["FilterFrequencyCutoffHz"], 1, 5000))
 
             if self.FilterFrequencyCutoffHz not in self.FilterFrequencyCutoffHzAcceptableValuesAndSettingsDict:
                 print("Canon6dofFTsensorFH30020_ReubenPython3Class __init__: Error, FilterFrequencyCutoffHz must be contained in the set " + str(self.FilterFrequencyCutoffHzAcceptableValuesAndSettingsDict))
@@ -468,18 +458,18 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         #########################################################
         #new_filtered_value = k * raw_sensor_value + (1 - k) * old_filtered_value
-        self.LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject_DictOfVariableFilterSettings = dict([("DataStreamingFrequency_CalculatedFromDedicatedTxThread", dict([("UseMedianFilterFlag", 1), ("UseExponentialSmoothingFilterFlag", 1),("ExponentialSmoothingFilterLambda", 0.05)])),
-                                                                                                             ("DataStreamingFrequency_CalculatedFromDedicatedRxThread", dict([("UseMedianFilterFlag", 1), ("UseExponentialSmoothingFilterFlag", 1),("ExponentialSmoothingFilterLambda", 0.05)]))])
+        self.LowPassFilterForDictsOfLists_DictOfVariableFilterSettings = dict([("DataStreamingFrequency_CalculatedFromDedicatedTxThread", dict([("UseMedianFilterFlag", 0), ("UseExponentialSmoothingFilterFlag", 1),("ExponentialSmoothingFilterLambda", 0.05)])),
+                                                                                ("DataStreamingFrequency_CalculatedFromDedicatedRxThread", dict([("UseMedianFilterFlag", 0), ("UseExponentialSmoothingFilterFlag", 1),("ExponentialSmoothingFilterLambda", 0.05)]))])
 
-        self.LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject_setup_dict = dict([("DictOfVariableFilterSettings", self.LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject_DictOfVariableFilterSettings)])
+        self.LowPassFilterForDictsOfLists_SetupDict = dict([("DictOfVariableFilterSettings", self.LowPassFilterForDictsOfLists_DictOfVariableFilterSettings)])
 
-        self.LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject = LowPassFilterForDictsOfLists_ReubenPython2and3Class(self.LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject_setup_dict)
-        self.LOWPASSFILTER_OPEN_FLAG = self.LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject.OBJECT_CREATED_SUCCESSFULLY_FLAG
+        self.LowPassFilterForDictsOfLists_Object = LowPassFilterForDictsOfLists_ReubenPython2and3Class(self.LowPassFilterForDictsOfLists_SetupDict)
+        self.LowPassFilterForDictsOfLists_OPEN_FLAG = self.LowPassFilterForDictsOfLists_Object.OBJECT_CREATED_SUCCESSFULLY_FLAG
         #########################################################
 
         #########################################################
-        if self.LOWPASSFILTER_OPEN_FLAG != 1:
-            print("Canon6dofFTsensorFH30020_ReubenPython3Class __init__: Failed to open LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject.")
+        if self.LowPassFilterForDictsOfLists_OPEN_FLAG != 1:
+            print("Canon6dofFTsensorFH30020_ReubenPython3Class __init__: Failed to open LowPassFilterForDictsOfLists_Object.")
             return
         #########################################################
 
@@ -542,30 +532,10 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
         #########################################################
         #########################################################
-        if self.USE_GUI_FLAG == 1:
-            self.StartGUI(self.root)
-        #########################################################
-        #########################################################
-
-        #########################################################
-        #########################################################
-        time.sleep(0.25)
-        #########################################################
-        #########################################################
-
-        #########################################################
-        #########################################################
         self.OBJECT_CREATED_SUCCESSFULLY_FLAG = 1
         #########################################################
         #########################################################
 
-    ##########################################################################################################
-    ##########################################################################################################
-
-    ##########################################################################################################
-    ##########################################################################################################
-    def __del__(self):
-        pass
     ##########################################################################################################
     ##########################################################################################################
 
@@ -729,65 +699,164 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
     ##########################################################################################################
     ##########################################################################################################
-    def PassThrough0and1values_ExitProgramOtherwise(self, InputNameString, InputNumber):
+    ##########################################################################################################
+    ##########################################################################################################
+    def PassThrough0and1values_ExitProgramOtherwise(self, InputNameString, InputNumber, ExitProgramIfFailureFlag=1):
 
+        ##########################################################################################################
+        ##########################################################################################################
         try:
+
+            ##########################################################################################################
             InputNumber_ConvertedToFloat = float(InputNumber)
+            ##########################################################################################################
+
         except:
+
+            ##########################################################################################################
             exceptions = sys.exc_info()[0]
-            print("PassThrough0and1values_ExitProgramOtherwise Error. InputNumber must be a float value, Exceptions: %s" % exceptions)
-            input("Press any key to continue")
-            sys.exit()
+            print("PassThrough0and1values_ExitProgramOtherwise Error. InputNumber must be a numerical value, Exceptions: %s" % exceptions)
 
-        try:
-            if InputNumber_ConvertedToFloat == 0.0 or InputNumber_ConvertedToFloat == 1:
-                return InputNumber_ConvertedToFloat
-            else:
-                input("PassThrough0and1values_ExitProgramOtherwise Error. '" +
-                          InputNameString +
-                          "' must be 0 or 1 (value was " +
-                          str(InputNumber_ConvertedToFloat) +
-                          "). Press any key (and enter) to exit.")
-
+            ##########################
+            if ExitProgramIfFailureFlag == 1:
                 sys.exit()
+            else:
+                return -1
+            ##########################
+
+            ##########################################################################################################
+
+        ##########################################################################################################
+        ##########################################################################################################
+
+        ##########################################################################################################
+        ##########################################################################################################
+        try:
+
+            ##########################################################################################################
+            if InputNumber_ConvertedToFloat == 0.0 or InputNumber_ConvertedToFloat == 1.0:
+                return InputNumber_ConvertedToFloat
+
+            else:
+
+                print("PassThrough0and1values_ExitProgramOtherwise Error. '" +
+                      str(InputNameString) +
+                      "' must be 0 or 1 (value was " +
+                      str(InputNumber_ConvertedToFloat) +
+                      ").")
+
+                ##########################
+                if ExitProgramIfFailureFlag == 1:
+                    sys.exit()
+
+                else:
+                    return -1
+                ##########################
+
+            ##########################################################################################################
+
         except:
+
+            ##########################################################################################################
             exceptions = sys.exc_info()[0]
             print("PassThrough0and1values_ExitProgramOtherwise Error, Exceptions: %s" % exceptions)
-            input("Press any key to continue")
-            sys.exit()
+
+            ##########################
+            if ExitProgramIfFailureFlag == 1:
+                sys.exit()
+            else:
+                return -1
+            ##########################
+
+            ##########################################################################################################
+
+        ##########################################################################################################
+        ##########################################################################################################
+
+    ##########################################################################################################
+    ##########################################################################################################
     ##########################################################################################################
     ##########################################################################################################
 
     ##########################################################################################################
     ##########################################################################################################
-    def PassThroughFloatValuesInRange_ExitProgramOtherwise(self, InputNameString, InputNumber, RangeMinValue, RangeMaxValue):
+    ##########################################################################################################
+    ##########################################################################################################
+    def PassThroughFloatValuesInRange_ExitProgramOtherwise(self, InputNameString, InputNumber, RangeMinValue, RangeMaxValue, ExitProgramIfFailureFlag=1):
+
+        ##########################################################################################################
+        ##########################################################################################################
         try:
+            ##########################################################################################################
             InputNumber_ConvertedToFloat = float(InputNumber)
+            ##########################################################################################################
+
         except:
+            ##########################################################################################################
             exceptions = sys.exc_info()[0]
             print("PassThroughFloatValuesInRange_ExitProgramOtherwise Error. InputNumber must be a float value, Exceptions: %s" % exceptions)
-            input("Press any key to continue")
-            sys.exit()
+            traceback.print_exc()
 
-        try:
-            if InputNumber_ConvertedToFloat >= RangeMinValue and InputNumber_ConvertedToFloat <= RangeMaxValue:
-                return InputNumber_ConvertedToFloat
-            else:
-                input("PassThroughFloatValuesInRange_ExitProgramOtherwise Error. '" +
-                          InputNameString +
-                          "' must be in the range [" +
-                          str(RangeMinValue) +
-                          ", " +
-                          str(RangeMaxValue) +
-                          "] (value was " +
-                          str(InputNumber_ConvertedToFloat) + "). Press any key (and enter) to exit.")
-
+            ##########################
+            if ExitProgramIfFailureFlag == 1:
                 sys.exit()
+            else:
+                return -11111.0
+            ##########################
+
+            ##########################################################################################################
+
+        ##########################################################################################################
+        ##########################################################################################################
+
+        ##########################################################################################################
+        ##########################################################################################################
+        try:
+
+            ##########################################################################################################
+            InputNumber_ConvertedToFloat_Limited = self.LimitNumber_FloatOutputOnly(RangeMinValue, RangeMaxValue, InputNumber_ConvertedToFloat)
+
+            if InputNumber_ConvertedToFloat_Limited != InputNumber_ConvertedToFloat:
+                print("PassThroughFloatValuesInRange_ExitProgramOtherwise Error. '" +
+                      str(InputNameString) +
+                      "' must be in the range [" +
+                      str(RangeMinValue) +
+                      ", " +
+                      str(RangeMaxValue) +
+                      "] (value was " +
+                      str(InputNumber_ConvertedToFloat) + ")")
+
+                ##########################
+                if ExitProgramIfFailureFlag == 1:
+                    sys.exit()
+                else:
+                    return -11111.0
+                ##########################
+
+            else:
+                return InputNumber_ConvertedToFloat_Limited
+            ##########################################################################################################
+
         except:
+            ##########################################################################################################
             exceptions = sys.exc_info()[0]
             print("PassThroughFloatValuesInRange_ExitProgramOtherwise Error, Exceptions: %s" % exceptions)
-            input("Press any key to continue")
-            sys.exit()
+            traceback.print_exc()
+
+            ##########################
+            if ExitProgramIfFailureFlag == 1:
+                sys.exit()
+            else:
+                return -11111.0
+            ##########################
+
+            ##########################################################################################################
+
+        ##########################################################################################################
+        ##########################################################################################################
+
+    ##########################################################################################################
+    ##########################################################################################################
     ##########################################################################################################
     ##########################################################################################################
 
@@ -839,7 +908,7 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
             if self.DataStreamingDeltaT_CalculatedFromDedicatedTxThread != 0.0:
                 DataStreamingFrequency_CalculatedFromDedicatedTxThread_TEMP = 1.0/self.DataStreamingDeltaT_CalculatedFromDedicatedTxThread
 
-                ResultsDict = self.LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject.AddDataDictFromExternalProgram(dict([("DataStreamingFrequency_CalculatedFromDedicatedTxThread", DataStreamingFrequency_CalculatedFromDedicatedTxThread_TEMP)]))
+                ResultsDict = self.LowPassFilterForDictsOfLists_Object.AddDataDictFromExternalProgram(dict([("DataStreamingFrequency_CalculatedFromDedicatedTxThread", DataStreamingFrequency_CalculatedFromDedicatedTxThread_TEMP)]))
                 self.DataStreamingFrequency_CalculatedFromDedicatedTxThread = ResultsDict["DataStreamingFrequency_CalculatedFromDedicatedTxThread"]["Filtered_MostRecentValuesList"][0]
 
             self.LastTime_CalculatedFromDedicatedTxThread = self.CurrentTime_CalculatedFromDedicatedTxThread
@@ -860,7 +929,7 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
             if self.DataStreamingDeltaT_CalculatedFromDedicatedRxThread != 0.0:
                 DataStreamingFrequency_CalculatedFromDedicatedRxThread_TEMP = 1.0/self.DataStreamingDeltaT_CalculatedFromDedicatedRxThread
 
-                ResultsDict = self.LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject.AddDataDictFromExternalProgram(dict([("DataStreamingFrequency_CalculatedFromDedicatedRxThread", DataStreamingFrequency_CalculatedFromDedicatedRxThread_TEMP)]))
+                ResultsDict = self.LowPassFilterForDictsOfLists_Object.AddDataDictFromExternalProgram(dict([("DataStreamingFrequency_CalculatedFromDedicatedRxThread", DataStreamingFrequency_CalculatedFromDedicatedRxThread_TEMP)]))
                 self.DataStreamingFrequency_CalculatedFromDedicatedRxThread = ResultsDict["DataStreamingFrequency_CalculatedFromDedicatedRxThread"]["Filtered_MostRecentValuesList"][0]
 
             self.LastTime_CalculatedFromDedicatedRxThread = self.CurrentTime_CalculatedFromDedicatedRxThread
@@ -884,7 +953,7 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
             if self.DataStreamingDeltaT_CalculateMeasurementForceDerivative != 0.0:
                 MeasurementForceDerivative_lbPerSec_raw = (self.CurrentMeasurementForce_lb - self.LastMeasurementForce_lb)/self.DataStreamingDeltaT_CalculateMeasurementForceDerivative
 
-                ResultsDict = self.LowPassFilterForDictsOfLists_ReubenPython2and3ClassObject.AddDataDictFromExternalProgram(dict([("ForceDerivative", MeasurementForceDerivative_lbPerSec_raw)]))
+                ResultsDict = self.LowPassFilterForDictsOfLists_Object.AddDataDictFromExternalProgram(dict([("ForceDerivative", MeasurementForceDerivative_lbPerSec_raw)]))
                 MeasurementForceDerivative_lbPerSec_filtered = ResultsDict["ForceDerivative"]["Filtered_MostRecentValuesList"][0]
 
                 MeasurementForceDerivative_DictOfConvertedValues = self.ConvertForceToAllUnits(MeasurementForceDerivative_lbPerSec_filtered, "lb")
@@ -1524,22 +1593,14 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
 
     ##########################################################################################################
     ##########################################################################################################
-    def StartGUI(self, GuiParent):
+    def CreateGUIobjects(self, TkinterParent):
 
-        self.GUI_Thread(GuiParent)
-    ##########################################################################################################
-    ##########################################################################################################
-
-    ##########################################################################################################
-    ##########################################################################################################
-    def GUI_Thread(self, parent):
-
-        print("Starting the GUI_Thread for Canon6dofFTsensorFH30020_ReubenPython3Class object.")
+        print("Canon6dofFTsensorFH30020_ReubenPython3Class, CreateGUIobjects event fired.")
 
         #################################################
         #################################################
-        self.root = parent
-        self.parent = parent
+        self.root = TkinterParent
+        self.parent = TkinterParent
         #################################################
         #################################################
 
@@ -1924,12 +1985,12 @@ class Canon6dofFTsensorFH30020_ReubenPython3Class(Frame): #Subclass the Tkinter 
             ##########################################################################################################
             if isinstance(DictToPrint[Key], dict): #RECURSION
                 ProperlyFormattedStringForPrinting = ProperlyFormattedStringForPrinting + \
-                                                     Key + ":\n" + \
+                                                     str(Key) + ":\n" + \
                                                      self.ConvertDictToProperlyFormattedStringForPrinting(DictToPrint[Key], NumberOfDecimalsPlaceToUse, NumberOfEntriesPerLine, NumberOfTabsBetweenItems)
 
             else:
                 ProperlyFormattedStringForPrinting = ProperlyFormattedStringForPrinting + \
-                                                     Key + ": " + \
+                                                     str(Key) + ": " + \
                                                      self.ConvertFloatToStringWithNumberOfLeadingNumbersAndDecimalPlaces_NumberOrListInput(DictToPrint[Key], 0, NumberOfDecimalsPlaceToUse)
             ##########################################################################################################
 
